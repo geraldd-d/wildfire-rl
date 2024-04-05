@@ -33,9 +33,8 @@ def create_map():
         for j in range(HEIGHT):
             elevation[i, j] = PNF(i/WIDTH, j/HEIGHT)
     fuel = np.full((WIDTH, HEIGHT), 20)
-    color = np.full((WIDTH, HEIGHT), METADATA["SIMULATION"]["COLOR"]['grass'])
     
-    return np.dstack((type, threshold, heat, fire_mobility, agent_mobility, agent_present, elevation, fuel, color))
+    return np.dstack((type, threshold, heat, fire_mobility, agent_mobility, agent_present, elevation, fuel))
 
 # reset all layers to default, random river near the middle
 def reset_map(env, make_river=False):
@@ -45,7 +44,6 @@ def reset_map(env, make_river=False):
     env[:, :, layers["fire_mobility"]] = 1
     env[:, :, layers["agent_mobility"]] = 1
     env[:, :, layers["agent_present"]] = 0
-    env[:, :, layers["color"]] = METADATA["SIMULATION"]["COLOR"]['grass']
     env[:, :, layers["fuel"]] = METADATA["SIMULATION"]["grass"]["fuel"]
     if make_river:
 
@@ -64,7 +62,6 @@ def reset_map(env, make_river=False):
             env[river_x, river_y, layers["type"]] = type_map["water"]
             env[river_x, river_y, layers["fire_mobility"]] = np.inf
             env[river_x, river_y, layers["agent_mobility"]] = np.inf
-            env[river_x, river_y, layers["color"]] = METADATA["SIMULATION"]["COLOR"]['water']
             new_river_y = river_y + 1
             new_river_x = (river_x + r.choice([-1, 0, 1]))
             while not r.choice(d) <= new_river_x < (WIDTH - r.choice(d)) and not (new_river_x, new_river_y) == (fx, fy):
@@ -97,7 +94,9 @@ class World:
         self.fire_at_border = False
     
     # GETTERS 
-        
+    def get_type_layer(self):
+        return self.env[:, :, layers["type"]]
+    
     def get_state(self):
             return np.dstack((self.env[:, :, layers['agent_present']],
                             self.env[:, :, layers['type']] == type_map['fire'],
@@ -209,7 +208,6 @@ class World:
         if self.env[location[0], location[1], layers['heat']] < self.env[location[0], location[1], layers['threshold']]:
             self.env[location[0], location[1], layers['heat']] = self.env[location[0], location[1], layers['threshold']] + 0.1
         self.burning_cells.add(location)
-        self.env[location[0], location[1], layers['color']] = METADATA["SIMULATION"]["COLOR"]['fire']
         if location[0] == 0 or location[0] == self.WIDTH - 1 or location[1] == 0 or location[1] == self.HEIGHT - 1:
             self.fire_at_border = True
     
@@ -228,7 +226,6 @@ class World:
     # set grid type
     def set_type(self, location, type):
         self.env[location[0], location[1], layers["type"]] = type
-        self.env[location[0], location[1], layers["color"]] = METADATA["SIMULATION"]["COLOR"][type_map[type]]
 
     # FIRE SPREAD
 
@@ -254,14 +251,8 @@ class World:
             self.burning_cells.remove(cell)
             self.env[x, y, layers["type"]] = type_map["burnt"]
             self.env[x, y, layers["fire_mobility"]] = np.inf
-            self.env[x, y, layers["color"]] = METADATA["SIMULATION"]["COLOR"]['burnt']
             return False # cell burnt out
         return True
-    
-    def render(self):
-        plt.imshow(self.env[:, :, layers['color']], cmap='gray', interpolation='nearest')
-        plt.colorbar()  # Optionally add a colorbar to show the mapping from grayscale values to colors
-        plt.show()
     
     
 class Agent:

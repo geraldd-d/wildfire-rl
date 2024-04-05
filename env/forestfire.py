@@ -41,6 +41,3 @@ class ForestFire:
         self.env.agents = [agent for agent in self.env.agents if not agent.is_dead()]
         if not self.env.agents or not burning_cells:
             self.env.RUNNING = False
-
-    def render(self):
-        self.env.render()

@@ -10,7 +10,8 @@ from collections import deque
 import torch.optim as optim
 from matplotlib import pyplot as plt
 from torch.autograd import profiler
-
+import boardVisualizer
+import pygame
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -30,7 +31,6 @@ def main():
     rewards = []
 
     with profiler.profile(use_cuda=torch.cuda.is_available()) as prof:
-        # Your training loop or the part of it you suspect is slow
         state = sim.reset()
         state_tensor = torch.tensor(state).float()
         state_tensor = state_tensor.permute(2, 0, 1)

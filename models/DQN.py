@@ -6,6 +6,8 @@ from collections import deque
 import random
 from env.constants import METADATA 
 from env.forestfire import ForestFire
+from boardVisualizer import BoardVisualizer
+import pygame
 
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -89,6 +91,7 @@ class DQNAgent:
         self.target_model.load_state_dict(self.model.state_dict())
 
     def collect_memories(self, num_of_episodes=100, perform_baseline=False):
+        bv = BoardVisualizer(self.sim)
         if not num_of_episodes:
             return
         # Wipe internal memory
@@ -120,7 +123,10 @@ class DQNAgent:
                 memories.append((state, action, reward, sprime, done))
                 state = sprime
                 total_reward += reward
-
+                bv.screen.fill((0, 0, 0))  # Fill the screen with black
+                bv.draw_grid()
+                pygame.display.flip()
+                bv.clock.tick(3)
                 # Only if we contained the fire, we collect the memories
                 if not perform_baseline and reward >= self.METADATA["REWARDS"]["success"]:
                     success_count += 1
@@ -133,6 +139,7 @@ class DQNAgent:
                     if success_count == num_of_episodes:
                         return
                 episode += 1
+        pygame.quit()
 
     def choose_randomwalk_action(self, avoid_fire=True):
         # It can happen in SARSA to ask for an action when agent has died.

@@ -1,12 +1,6 @@
 import numpy as np
 from colour import Color
-SIZE = 10 # Size of Simulation
-SPEED = 1 # Speed of Agent
-
-def grayscale(color):
-    r, g, b = color.red, color.green, color.blue
-    gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
-    return gray
+SIZE = 40 # Size of Simulation
 
 # Environment Attributes
 METADATA = {
@@ -28,21 +22,12 @@ METADATA = {
     "SIMULATION": {
         "width": SIZE,
         "height": SIZE,
-        "speed": SPEED,
         "wind": [0.15, (2,2)], # Strength, Direction Vector
         "rivers" : False,
         "grass" : {
             "heat": 0.3,
             "threshold": 3,
             "fuel": 20
-        },
-        "COLOR": {
-            "fire": grayscale(Color("red")),
-            "agent": grayscale(Color("pink")),
-            "grass": grayscale(Color("green")),
-            "water": grayscale(Color("blue")),
-            "dirt": grayscale(Color("brown")),
-            "burnt": grayscale(Color("black"))
         },
     },
     # DQN
